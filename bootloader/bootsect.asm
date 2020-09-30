@@ -12,12 +12,12 @@ errmsg_load          db 'An error occured while loading system!', 0x0d, 0x0a, 0
 
 ;LBA mode Disk Address Packet Structure
 disk_address_packet:
-        db 16				; 1 byte, size of packet (16 bytes)
-        db 0				; 1 byte, always is 0
-        dw 1				; 2 bytes, number of sectors to transfer (max 127 on some BIOSes)
-        dw LOADER_ADDR, 0x0 ; 4 bytes, transfer buffer (16 bit segment:16 bit offset), buffer will store in 0x0:LOADER_ADDR
-        dd 1				; 4 bytes, lower 32-bits of 48-bit starting LBA
-        dd 0				; 4 bytes, upper 32-bits of 48-bit starting LBAs
+        db 16                 ; 1 byte, size of packet (16 bytes)
+        db 0                  ; 1 byte, always is 0
+        dw 1                  ; 2 bytes, number of sectors to transfer (max 127 on some BIOSes)
+        dw LOADER_ADDR, 0x0   ; 4 bytes, transfer buffer (16 bit segment:16 bit offset), buffer will store in 0x0:LOADER_ADDR
+        dd 1                  ; 4 bytes, lower 32-bits of 48-bit starting LBA
+        dd 0                  ; 4 bytes, upper 32-bits of 48-bit starting LBAs
 
 ;Print a message that si points and end when meets 0x0
 printmsg:
