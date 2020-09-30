@@ -1,16 +1,23 @@
-BOOT_ORGI_ADDR  equ  0x7c00
-BOOT_NEWADDR	equ  0x2e00
-TEMP_STACK      equ  BOOT_NEWADDR-0x100
-BOOTSECT_SIZE   equ  512
+%include "meminfo.inc"
 
 %define newaddr(addr) (addr - BOOT_ORGI_ADDR + BOOT_NEWADDR)
 
 section bootsect align=16 vstart=BOOT_ORGI_ADDR
 jmp start
 
-hellomsg  db 'Welcome to the COS World!', 0x0d, 0x0a, 0
-movedmsg  db 'bootsect is moved sucessfully!', 0x0d, 0x0a, 0
-errmsg_lba db "The machine doesn't support disk lba mode!", 0x0d, 0x0a, 0
+hellomsg			 db 'Welcome to the COS World!', 0x0d, 0x0a, 0
+movedmsg			 db 'bootsect is moved sucessfully!', 0x0d, 0x0a, 0
+errmsg_lba           db "The machine doesn't support disk lba mode!", 0x0d, 0x0a, 0
+errmsg_load          db 'An error occured while loading system!', 0x0d, 0x0a, 0
+
+;LBA mode Disk Address Packet Structure
+disk_address_packet:
+        db 16				; 1 byte, size of packet (16 bytes)
+        db 0				; 1 byte, always is 0
+        dw 1				; 2 bytes, number of sectors to transfer (max 127 on some BIOSes)
+        dw 0x3000, 0x0		; 4 bytes, transfer buffer (16 bit segment:16 bit offset), buffer will store in 0x0:0x3000
+        dd 1				; 4 bytes, lower 32-bits of 48-bit starting LBA
+        dd 0				; 4 bytes, upper 32-bits of 48-bit starting LBAs
 
 ;Print a message that si points and end when meets 0x0
 printmsg:
@@ -69,8 +76,19 @@ continue_in_new_address:
 		mov si, newaddr(movedmsg)
 		call printmsg
 		
+		;loading loader from disk using lba mode
+		mov si, disk_address_packet
+		mov ah, 0x42
+		mov dl, 0x80
+		int 0x13
+		jc load_error
+		jmp 0x0 : LOADER_ADDR
 		jmp $
 
+load_error:
+	    mov si, newaddr(load_error)			
+		call printmsg
+		jmp $
 
 times 510-($-$$) db 0x0
 db 0x55, 0xaa
