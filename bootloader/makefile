@@ -1,7 +1,7 @@
 os.img:    bootsect loader
 	dd if=/dev/zero of=$@ bs=1MiB count=16
-	dd if=bootsect  of=$@ bs=512  count=1
-	dd if=loader    of=$@ seek=1  bs=512
+	dd if=bootsect  of=$@ bs=512  count=1  conv=notrunc
+	dd if=loader    of=$@ seek=1  bs=512   conv=notrunc
 
 disasm:    bootsect loader
 	ndisasm bootsect > disasm.bootsect
