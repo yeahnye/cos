@@ -19,6 +19,6 @@ loader:   loader.asm meminfo.inc
 disasm_clean:
 	rm -rf disasm.*
 
-qemu:
+qemu:    os.img
 	qemu-system-x86_64 -hda os.img -nographic
 

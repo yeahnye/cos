@@ -5,8 +5,8 @@
 section bootsect align=16 vstart=BOOT_ORGI_ADDR
 jmp start
 
-hellomsg			 db 'Welcome to the COS World!', 0x0d, 0x0a, 0
-movedmsg			 db 'bootsect is moved sucessfully!', 0x0d, 0x0a, 0
+hellomsg             db 'Welcome to the COS World!', 0x0d, 0x0a, 0
+movedmsg             db 'bootsect is moved sucessfully!', 0x0d, 0x0a, 0
 errmsg_lba           db "The machine doesn't support disk lba mode!", 0x0d, 0x0a, 0
 errmsg_load          db 'An error occured while loading system!', 0x0d, 0x0a, 0
 
@@ -15,7 +15,7 @@ disk_address_packet:
         db 16				; 1 byte, size of packet (16 bytes)
         db 0				; 1 byte, always is 0
         dw 1				; 2 bytes, number of sectors to transfer (max 127 on some BIOSes)
-        dw 0x3000, 0x0		; 4 bytes, transfer buffer (16 bit segment:16 bit offset), buffer will store in 0x0:0x3000
+        dw LOADER_ADDR, 0x0 ; 4 bytes, transfer buffer (16 bit segment:16 bit offset), buffer will store in 0x0:LOADER_ADDR
         dd 1				; 4 bytes, lower 32-bits of 48-bit starting LBA
         dd 0				; 4 bytes, upper 32-bits of 48-bit starting LBAs
 
@@ -61,7 +61,7 @@ start:
 		call checklba
 		call sayhello
 
-		;move boot sector from phyaddr 0x7c00 to 0x3000
+		;move boot sector from phyaddr 0x7c00 to BOOT_NEWADDR, then jump there
 		xor ax, ax
 		mov ds, ax
 		mov es, ax
@@ -70,7 +70,7 @@ start:
 		mov cx, BOOTSECT_SIZE>>1
 		rep movsw
 
-		jmp 0x0 : newaddr(continue_in_new_address)
+		jmp 0x0 : newaddr(continue_in_new_address)      ; segment:offset in segment
 
 continue_in_new_address:
 		mov si, newaddr(movedmsg)
